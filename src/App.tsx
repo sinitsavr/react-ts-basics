@@ -1,79 +1,64 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { TodoItem } from './components/TodoItem'
 import './App.css'
+import { useTodos } from './hooks/useTodos'
 
-type Todo ={
-  id: number
-  title: string
-  compaleted: boolean
-}
-
-
-function App() {
-  const [todos, setTodos] = useState<Todo[]>([])
+export default function App() {
+  const { todos, setTodos } = useTodos()      
   const [title, setTitle] = useState('')
+
   const addTodo = () => {
-    if (!title.trim()) return 
+    if (!title.trim()) return
 
     setTodos(prev => [
       ...prev,
-      {
-        id: Date.now(),
-        title,
-        compaleted: false, 
-      },
+      { id: Date.now(), title, completed: false },
     ])
+
     setTitle('')
   }
-const  toggleTodo = (id: number) => {
-  setTodos(prev => 
-    prev.map (todo =>
-      todo.id === id 
-      ? {...todo, complated: !todo.complated }
-      : todo
+
+  const toggleTodo = (id: number) => {
+    setTodos(prev =>
+      prev.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
     )
-  )
-}
-const removeTodo = (id: number) => {
-  setTodos (prev => prev.filter(todo => todo.id !==id))
-}
+  }
+
+  const removeTodo = (id: number) => {
+    setTodos(prev => prev.filter(todo => todo.id !== id))
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') addTodo()
+  }
 
   return (
-    <div style={{ padding: 20, maxWidth: 400}}>
+    <div style={{ padding: 20, maxWidth: 400 }}>
       <h1>Todo List</h1>
-
       <div>
         <input
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder='New task'
+          value={title} // ✅ без String(title ?? '')
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder="New task"
         />
-        <button onClick={addTodo}>Add</button>       
+        <button onClick={addTodo} disabled={!title.trim()}>Add</button>
       </div>
+
       <ul>
         {todos.map(todo => (
-          <li key={todo.id}>
-          <label>
-            <input 
-              type='checkbox'
-              checked={todo.complated}
-              onChange={() => toggleTodo(todo.id)}
-            />
-            <span style={{ textDecoration: todo.complated ? 'line-through' : 'none', 
-              marginLeft: 8
-             }}>
-             {todo.title}
-            </span>
-          </label>
-
-          <button onClick={ () => removeTodo(todo.id)}>❌</button>
-          </li>
-            ))}
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={toggleTodo}
+            onRemove={removeTodo}
+          />
+        ))}
       </ul>
-            </div>
-  
-        )
+    </div>
+  )
 }
-
-export default App
