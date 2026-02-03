@@ -12,7 +12,7 @@ export function TodoItem({ todo, onToggle, onRemove }: TodoItemProps) {
       <label>
         <input
           type="checkbox"
-          checked={todo.completed}
+          checked={Boolean(todo?.completed)}
           onChange={() => onToggle(todo.id)}
         />
 
