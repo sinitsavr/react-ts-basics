@@ -1,23 +1,46 @@
-import { useEffect, useState } from "react";       
-import { Todo } from "../types";
-export function useTodos() {
-    const [todos, setTodos] = useState<Todo[]>([])
-    // Загружаем данные из localStorage при инициализации
-    useEffect(() => {
-        const savedTodos = localStorage.getItem('todos')
-        
-        if (savedTodos) {
-            try {
-                const parsedTodos: Todo[] = JSON.parse(savedTodos)
-                setTodos(parsedTodos)
-            } catch (error) {
-                console.error('Error parsing todos from localStorage:', error)
-            }
-        }
-    }, [])
-    // Сохраняем данные в localStorage при изменении todos
-    useEffect(() => {
-        localStorage.setItem('todos', JSON.stringify(todos))
-    }, [todos])
-    return { todos, setTodos }
+import { useState, useEffect } from 'react'
+import type { Todo } from '../types/todo'
+
+const STORAGE_KEY = 'todos'
+
+function loadTodos(): Todo[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? (JSON.parse(saved) as Todo[]) : []
+  } catch {
+    return []
+  }
 }
+
+export function useTodos() {
+  const [todos, setTodos] = useState<Todo[]>(loadTodos)
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+  }, [todos])
+  const addTodo = (title: string) => {
+    const trimmed = title.trim()
+    if (!trimmed) return
+
+    const newTodo: Todo = {
+      id: Date.now(),
+      title: trimmed,
+      completed: false,
+    }
+    setTodos(prev => [...prev, newTodo])
+  }
+    const toggleTodo = (id: number) => {
+      setTodos(prev =>
+        prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
+      )
+    }
+    const removeTodo = (id: number) => {
+      setTodos(prev => prev.filter(t => t.id !== id))
+    }
+    const clearCompleted = () => {
+      setTodos(prev => prev.filter(t => !t.completed))
+    }
+    return { todos, addTodo, toggleTodo, removeTodo, clearCompleted }
+  }
+
+
