@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Todo } from '../types/todo'
+import { toggleTodoById, removeTodoById } from '../utils/todos'
 
 const STORAGE_KEY = 'todos'
 
@@ -31,11 +32,11 @@ export function useTodos() {
   }
     const toggleTodo = (id: number) => {
       setTodos(prev =>
-        prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
-      )
-    }
+        toggleTodoById(prev, id)
+      )}
+    
     const removeTodo = (id: number) => {
-      setTodos(prev => prev.filter(t => t.id !== id))
+      setTodos(prev => removeTodoById(prev, id))
     }
     const clearCompleted = () => {
       setTodos(prev => prev.filter(t => !t.completed))
